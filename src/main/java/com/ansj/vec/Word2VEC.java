@@ -56,7 +56,7 @@ public class Word2VEC {
 	private HashMap<String, float[]> wordMap = new HashMap<String, float[]>();
 
 	private int words;
-	private int size;
+	private int size; //词向量长度
 	private int topNSize = 40;
 
 	/**
@@ -111,7 +111,9 @@ public class Word2VEC {
 	 *            模型的路径
 	 * @throws IOException
 	 */
-	public void loadJavaModel(String path){
+	//public void loadJavaModel(String path){
+	public boolean loadJavaModel(String path){
+		boolean result = false;
 		try {
 			DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(path)));
 			words = dis.readInt();
@@ -139,14 +141,18 @@ public class Word2VEC {
 				wordMap.put(key, value);
 			}
 			dis.close();
+			result = true;
 		} catch (FileNotFoundException fnfe) {
 			fnfe.printStackTrace();
+			return false;
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return false;
 		}
-
+		return result;
 	}
 
 	private static final int MAX_SIZE = 50;

@@ -57,8 +57,8 @@ public class AnalysisImpl implements Analysis {
         return TokensList;
     }
     public List<Keyword> extractKeywords(String title, String content, int KeywordsNum){
-        KeyWordComputer kwc = new KeyWordComputer(10);
 
+        KeyWordComputer kwc = new KeyWordComputer(KeywordsNum);
         List<Keyword> result = kwc.computeArticleTfidf(title, content);
         /*
         // 每个元素有 name,score,freq等成员。

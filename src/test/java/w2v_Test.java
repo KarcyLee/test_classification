@@ -28,7 +28,9 @@ public class w2v_Test {
 
     private static final File CorpusFile = new File("result.txt");
     public static void main(String[] args) throws IOException {
-        File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C23-Mine").listFiles();
+        File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C3-Art").listFiles();
+        //File root = new File("D:\\Data");
+        //List<File> files = getAllFiles(root);
 
         //构建语料
         FileOutputStream fos = null;
@@ -48,7 +50,7 @@ public class w2v_Test {
         //进行分词训练
 
         //Learn lean = new Learn() ;
-        Learn lean = new Learn(false,500,20,0.025, 0.001) ;
+        Learn lean = new Learn(false,200,5,0.025, 0.001) ;
 
         lean.learnFile(CorpusFile) ;
 
@@ -132,6 +134,39 @@ public class w2v_Test {
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    final static void showAllFiles(File dir){
+        File[] fs = dir.listFiles();
+        for(int i=0; i < fs.length; i++){
+            System.out.println(fs[i].getAbsolutePath());
+            if(fs[i].isDirectory()){
+                try{
+                    showAllFiles(fs[i]);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    final static List<File> getAllFiles(File dir) {
+        List<File> result = new ArrayList<File>();
+        File[] fs = dir.listFiles();
+        for(int i=0; i < fs.length; i++){
+            result.add(fs[i]);
+            System.out.println(fs[i].getAbsolutePath());
+            if(fs[i].isDirectory()){
+                try{
+                    List<File> child_files =getAllFiles(fs[i]);
+                    for (File f : child_files){
+                        result.add(f);
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 
 }
