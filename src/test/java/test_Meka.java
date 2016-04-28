@@ -21,8 +21,8 @@ public class test_Meka {
 
 
         //prepare data
-       genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test.arff","test");
-
+       //genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test.arff","test");
+        genTrainTestARFF("train_samples","test.arff","test");
 
         try {
             Instances dataset = new Instances(new BufferedReader(new FileReader("test.arff")));
@@ -41,7 +41,6 @@ public class test_Meka {
             String[] options = {"-P","0", "-N", "5","-W","weka.classifiers.functions.SMO"};
             ps.setOptions(options);
             ps.buildClassifier(dataTrain);
-
             saveClassifier(ps,"classifier");
 
             float right = 0.0f;

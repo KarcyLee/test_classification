@@ -7,6 +7,15 @@
     <groupId>com.sohu</groupId>
     <artifactId>TestClassification</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <!-- 增加新的maven源 -->
+    <repositories>
+        <repository>
+            <id>mvn-repo</id>
+            <url>http://maven.nlpcn.org/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -14,18 +23,20 @@
             <version>1.2.4</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.4</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.ansj</groupId>
             <artifactId>ansj_seg</artifactId>
             <version>3.7.3</version>
-            <classifier>sources</classifier>
         </dependency>
+
         <dependency>
             <groupId>org.ansj</groupId>
             <artifactId>tree_split</artifactId>
