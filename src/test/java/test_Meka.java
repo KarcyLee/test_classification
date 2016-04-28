@@ -5,22 +5,14 @@
 import com.sohu.text.ConstructVectorSpace.ConstructVecSpace;
 import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords;
 
-import weka.classifiers.trees.J48;
 import weka.core.*;
-import weka.core.converters.ConverterUtils;
-import meka.classifiers.multilabel.*;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.classifiers.multilabel.PS;
-import meka.core.Result;
-import meka.classifiers.multilabel.ProblemTransformationMethod;
 import weka.classifiers.Classifier;
 
 import java.io.*;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Random;
-
-import static weka.core.Utils.splitOptions;
 
 
 public class test_Meka {
@@ -33,7 +25,6 @@ public class test_Meka {
 
 
         try {
-
             Instances dataset = new Instances(new BufferedReader(new FileReader("test.arff")));
             dataset.setClassIndex(dataset.numAttributes() -1); //设置分类属性所在行号（第一行为0号），instancesTest.numAttributes()可以取得属性总数
 
@@ -50,8 +41,7 @@ public class test_Meka {
             String[] options = {"-P","0", "-N", "5","-W","weka.classifiers.functions.SMO"};
             ps.setOptions(options);
             ps.buildClassifier(dataTrain);
-            //String[] options = {"-P 1 -N 1 -t test.arff -W weka.classifiers.functions.SMO"};
-            //ProblemTransformationMethod.runClassifier(ps,options);
+
             saveClassifier(ps,"classifier");
 
             float right = 0.0f;
