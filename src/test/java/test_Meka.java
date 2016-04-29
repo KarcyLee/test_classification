@@ -55,8 +55,10 @@ public class test_Meka {
             float right = 0.0f;
             for(int  i = 0;i<dataTest.numInstances();i++)//测试分类结果
             {
-                double testLabel = ps.classifyInstance(dataTest.instance(i));
+                double testClassIndex = ps.classifyInstance(dataTest.instance(i));
                 double truthLabel = dataTest.instance(i).classValue();
+                String strTestLabel = dataTest.classAttribute().value( (int) testClassIndex );
+                double testLabel = Double.parseDouble(strTestLabel);
 
                 logger.info("test: " + testLabel + "  truth: "+ truthLabel);
                 System.out.printf("test: %f  truth: %f \n",testLabel,truthLabel);
