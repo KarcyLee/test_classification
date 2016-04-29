@@ -10,13 +10,16 @@ import com.sohu.text.MyIO.impl.ReadDocImpl;
 import com.sohu.text.Tokens.Analysis;
 import com.sohu.text.Tokens.impl.AnalysisImpl;
 import org.ansj.app.keyword.Keyword;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Created by pengli211286 on 2016/4/22.
  */
 public class ConstructVecByKeywords implements ConstructVecSpace {
+    private static Logger logger = LoggerFactory.getLogger(ConstructVecByKeywords.class);
+
     /********成员变量部分************************/
     private int keywordsNum ; //每个文档提取关键词的数目
     private boolean isMultiplyScore ; //词向量是否考虑Score作为权重
@@ -34,9 +37,13 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
         loadW2VModel(w2vModel);
     }
     public  ConstructVecByKeywords(int nKeywordsNum, String w2vModelPath, boolean isMulScore){
-        keywordsNum = nKeywordsNum;
-        isMultiplyScore = isMulScore;
-        loadW2VModel(w2vModelPath);
+        try {
+            keywordsNum = nKeywordsNum;
+            isMultiplyScore = isMulScore;
+            loadW2VModel(w2vModelPath);
+        }catch (Exception e){
+            logger.info("ConstructVecByKeywords() error ",e);
+        }
     }
 
     public void setKeywordsNum(int nKeywordsNum){
@@ -46,18 +53,24 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
         return keywordsNum;
     }
     public boolean loadW2VModel(String w2vPath){
-        if(hasLoadW2VModel){
-            return  true;
+        try {
+            if (hasLoadW2VModel) {
+                return true;
+            }
+            if (w2v == null) {
+                w2v = new Word2VEC();
+            }
+            if (w2v.loadJavaModel(w2vPath)) { //w2v.loadJavaModel("vector.mod") ;
+                w2vModel = w2vPath;
+                hasLoadW2VModel = true;
+                return true;
+            }
+            return false;
+
+        }catch(Exception e){
+            logger.error("loadW2VModel error ",e);
+            return false;
         }
-        if(w2v == null) {
-            w2v = new Word2VEC();
-        }
-        if(w2v.loadJavaModel(w2vPath) ) { //w2v.loadJavaModel("vector.mod") ;
-            w2vModel = w2vPath;
-            hasLoadW2VModel = true;
-            return true;
-        }
-        return false;
     }
     public void setIsMultiplyScore(boolean isMulScore){
         isMultiplyScore = isMulScore;
@@ -80,54 +93,65 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
 
     /////***********************接口部分***********************************/////
     public float[] genVecFromDoc(String docPath) {
-        float[] result = null;
-        //读取文档内容。
-        ReadDoc rd = new ReadDocImpl();
-        String content = rd.Doc2String(docPath);
-        //
-        result = genVecFromString(content);
-        return result;
+        try {
+            float[] result = null;
+            //读取文档内容。
+            ReadDoc rd = new ReadDocImpl();
+            String content = rd.Doc2String(docPath);
+            //
+            result = genVecFromString(content);
+            return result;
+        }catch(Exception e){
+            logger.error("genVecFromDoc error ",e);
+            return null;
+        }
     }
     public float[] genVecFromString(String content){
-        float[] result = null;
-        if (content.length() == 0)
-            return result;
-        //分词并提取关键词
-        Analysis as = new AnalysisImpl();
-        List<Keyword> keywords = as.extractKeywords("",content,keywordsNum);
+        try {
+            float[] result = null;
+            if (content.length() == 0)
+                return result;
+            //分词并提取关键词
+            Analysis as = new AnalysisImpl();
+            List<Keyword> keywords = as.extractKeywords("", content, keywordsNum);
 
-        //若未加载W2V 模型
-        if(! hasLoadW2VModel){
-            ////加载w2v模型
-            w2v = new Word2VEC() ;
-            w2v.loadJavaModel(w2vModel) ; //w2v.loadJavaModel("vector.mod") ;
-            hasLoadW2VModel = true;
-        }
-
-        ///获取向量长度
-        int vecLength = w2v.getSize();
-        ///为返回结果数组赋空间
-        result = new float[vecLength * keywordsNum];//关键词个数小于keywordsNum的的，以0补足
-        //为结果数组赋值,即为各个词向量的级联。
-        for (int i = 0; i < keywords.size(); ++i){
-            Keyword tKW = keywords.get(i);
-            //获取对应关键词的向量
-            float[] vec = w2v.getWordVector(tKW.getName());
-            float score = (float) tKW.getScore();
-            //若模型中没有该词，返回向量长度为0；
-            if(vec == null){
-                continue;
+            //若未加载W2V 模型
+            if (!hasLoadW2VModel) {
+                ////加载w2v模型
+                w2v = new Word2VEC();
+                w2v.loadJavaModel(w2vModel); //w2v.loadJavaModel("vector.mod") ;
+                hasLoadW2VModel = true;
             }
-            int startPos = i * vecLength;
-            for (int j = 0; j < min(vec.length,vecLength); ++j){
-                if(isMultiplyScore){
-                    result[startPos + j] = score * vec[j];
-                }else {
-                    result[startPos + j] = vec[j];
+
+            ///获取向量长度
+            int vecLength = w2v.getSize();
+            ///为返回结果数组赋空间
+            result = new float[vecLength * keywordsNum];//关键词个数小于keywordsNum的的，以0补足
+            //为结果数组赋值,即为各个词向量的级联。
+            for (int i = 0; i < keywords.size(); ++i) {
+                Keyword tKW = keywords.get(i);
+                //获取对应关键词的向量
+                float[] vec = w2v.getWordVector(tKW.getName());
+                float score = (float) tKW.getScore();
+                //若模型中没有该词，返回向量长度为0；
+                if (vec == null) {
+                    logger.info(" 模型中没有 " + tKW.getName() + " ");
+                    continue;
+                }
+                int startPos = i * vecLength;
+                for (int j = 0; j < min(vec.length, vecLength); ++j) {
+                    if (isMultiplyScore) {
+                        result[startPos + j] = score * vec[j];
+                    } else {
+                        result[startPos + j] = vec[j];
+                    }
                 }
             }
+            return result;
+        }catch (Exception e){
+            logger.error("genVecFromString error ",e);
+            return null;
         }
-        return result;
 
     }
 

@@ -23,46 +23,54 @@ import love.cq.util.StringUtil;
 
 import com.sohu.text.Tokens.Analysis;
 import org.ansj.util.FilterModifWord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class w2v_Test {
+    private static Logger logger = LoggerFactory.getLogger(w2v_Test.class);
 
     private static final File CorpusFile = new File("result.txt");
     public static void main(String[] args) throws IOException {
-        File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C3-Art").listFiles();
-        //File root = new File("D:\\Data");
-        //List<File> files = getAllFiles(root);
-
-        //构建语料
-        FileOutputStream fos = null;
         try {
-            fos = new FileOutputStream(CorpusFile);
-            for (File file : files) {
-                if (file.canRead() && file.getName().endsWith(".txt")) {
-                    myParserFile(fos, file);
+            File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C3-Art").listFiles();
+            //File root = new File("D:\\Data");
+            //List<File> files = getAllFiles(root);
+
+            //构建语料
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(CorpusFile);
+                for (File file : files) {
+                    if (file.canRead() && file.getName().endsWith(".txt")) {
+                        myParserFile(fos, file);
+                    }
                 }
+            } catch (NullPointerException npe) {
+                npe.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }catch (NullPointerException npe){
-            npe.printStackTrace();
-        }catch(Exception e){
-            e.printStackTrace();
+            logger.info("构建语料完毕！");
+
+            //进行分词训练
+            //Learn lean = new Learn() ;
+            Learn lean = new Learn(false, 200, 5, 0.025, 0.001);
+            lean.learnFile(CorpusFile);
+            logger.info("分词训练完毕！");
+
+            lean.saveModel(new File("vector.mod"));
+            logger.info("词模型保存完毕！");
+
+            //加载测试
+            Word2VEC w2v = new Word2VEC();
+            w2v.loadJavaModel("vector.mod");
+            logger.info("词模型加载成功！");
+
+            System.out.println(w2v.distance("煤矿"));
+
+        }catch (Exception e){
+            logger.error("w2v_test_main() error! ",e);
         }
-
-        //进行分词训练
-
-        //Learn lean = new Learn() ;
-        Learn lean = new Learn(false,200,5,0.025, 0.001) ;
-
-        lean.learnFile(CorpusFile) ;
-
-        lean.saveModel(new File("vector.mod")) ;
-
-        //加载测试
-        Word2VEC w2v = new Word2VEC() ;
-
-        w2v.loadJavaModel("vector.mod") ;
-
-        System.out.println(w2v.distance("煤矿"));
-
 
     }
 

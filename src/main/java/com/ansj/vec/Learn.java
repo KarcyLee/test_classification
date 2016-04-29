@@ -13,9 +13,11 @@ import com.ansj.vec.domain.HiddenNeuron;
 import com.ansj.vec.domain.Neuron;
 import com.ansj.vec.domain.WordNeuron;
 import com.ansj.vec.util.Haffman;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Learn {
-
+    private static Logger logger = LoggerFactory.getLogger(Learn.class);
     private Map<String, Neuron> wordMap = new HashMap<String,Neuron>();
     /**
      * 训练多少个特征
@@ -42,22 +44,30 @@ public class Learn {
     private int MAX_EXP = 6;
 
     public Learn(Boolean isCbow, Integer layerSize, Integer window, Double alpha, Double sample) {
-        createExpTable();
-        if (isCbow != null) {
-            this.isCbow = isCbow;
+        try {
+            createExpTable();
+            if (isCbow != null) {
+                this.isCbow = isCbow;
+            }
+            if (layerSize != null)
+                this.layerSize = layerSize;
+            if (window != null)
+                this.window = window;
+            if (alpha != null)
+                this.alpha = alpha;
+            if (sample != null)
+                this.sample = sample;
+        }catch (Exception e){
+            logger.error("Learn() error! ",e);
         }
-        if (layerSize != null)
-            this.layerSize = layerSize;
-        if (window != null)
-            this.window = window;
-        if (alpha != null)
-            this.alpha = alpha;
-        if (sample != null)
-            this.sample = sample;
     }
 
     public Learn() {
-        createExpTable();
+        try {
+            createExpTable();
+        }catch (Exception e){
+            logger.error("Learn() error! ",e);
+        }
     }
 
     /**
@@ -120,11 +130,11 @@ public class Learn {
             System.out.println("Words in train file: " + trainWordsCount);
             System.out.println("sucess train over!");
         }catch (FileNotFoundException fnne){
-            fnne.printStackTrace();
+            logger.error( "trainModel() FileNotFoundException! ",fnne);
         }catch( IOException  ioe){
-            ioe.printStackTrace();
+            logger.error( "trainModel() IOException ! ",ioe);
         }catch (Exception e){
-            e.printStackTrace();
+            logger.error( "trainModel() error! ",e);
         }
     }
 
@@ -135,50 +145,54 @@ public class Learn {
      */
     private void skipGram(int index, List<WordNeuron> sentence, int b) {
         // TODO Auto-generated method stub
-        WordNeuron word = sentence.get(index);
-        int a, c = 0;
-        for (a = b; a < window * 2 + 1 - b; a++) {
-            if (a == window) {
-                continue;
-            }
-            c = index - window + a;
-            if (c < 0 || c >= sentence.size()) {
-                continue;
-            }
-
-            double[] neu1e = new double[layerSize];//误差项
-            //HIERARCHICAL SOFTMAX
-            List<Neuron> neurons = word.neurons;
-            WordNeuron we = sentence.get(c);
-            for (int i = 0; i < neurons.size(); i++) {
-                HiddenNeuron out = (HiddenNeuron) neurons.get(i);
-                double f = 0;
-                // Propagate hidden -> output
-                for (int j = 0; j < layerSize; j++) {
-                    f += we.syn0[j] * out.syn1[j];
-                }
-                if (f <= -MAX_EXP || f >= MAX_EXP) {
+        try {
+            WordNeuron word = sentence.get(index);
+            int a, c = 0;
+            for (a = b; a < window * 2 + 1 - b; a++) {
+                if (a == window) {
                     continue;
-                } else {
-                    f = (f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2);
-                    f = expTable[(int) f];
                 }
-                // 'g' is the gradient multiplied by the learning rate
-                double g = (1 - word.codeArr[i] - f) * alpha;
-                // Propagate errors output -> hidden
-                for (c = 0; c < layerSize; c++) {
-                    neu1e[c] += g * out.syn1[c];
+                c = index - window + a;
+                if (c < 0 || c >= sentence.size()) {
+                    continue;
                 }
-                // Learn weights hidden -> output
-                for (c = 0; c < layerSize; c++) {
-                    out.syn1[c] += g * we.syn0[c];
-                }
-            }
 
-            // Learn weights input -> hidden
-            for (int j = 0; j < layerSize; j++) {
-                we.syn0[j] += neu1e[j];
+                double[] neu1e = new double[layerSize];//误差项
+                //HIERARCHICAL SOFTMAX
+                List<Neuron> neurons = word.neurons;
+                WordNeuron we = sentence.get(c);
+                for (int i = 0; i < neurons.size(); i++) {
+                    HiddenNeuron out = (HiddenNeuron) neurons.get(i);
+                    double f = 0;
+                    // Propagate hidden -> output
+                    for (int j = 0; j < layerSize; j++) {
+                        f += we.syn0[j] * out.syn1[j];
+                    }
+                    if (f <= -MAX_EXP || f >= MAX_EXP) {
+                        continue;
+                    } else {
+                        f = (f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2);
+                        f = expTable[(int) f];
+                    }
+                    // 'g' is the gradient multiplied by the learning rate
+                    double g = (1 - word.codeArr[i] - f) * alpha;
+                    // Propagate errors output -> hidden
+                    for (c = 0; c < layerSize; c++) {
+                        neu1e[c] += g * out.syn1[c];
+                    }
+                    // Learn weights hidden -> output
+                    for (c = 0; c < layerSize; c++) {
+                        out.syn1[c] += g * we.syn0[c];
+                    }
+                }
+
+                // Learn weights input -> hidden
+                for (int j = 0; j < layerSize; j++) {
+                    we.syn0[j] += neu1e[j];
+                }
             }
+        }catch (Exception e){
+            logger.error("skipGram() error! ",e);
         }
 
     }
@@ -190,68 +204,72 @@ public class Learn {
      * @param b
      */
     private void cbowGram(int index, List<WordNeuron> sentence, int b) {
-        WordNeuron word = sentence.get(index);
-        int a, c = 0;
+        try {
+            WordNeuron word = sentence.get(index);
+            int a, c = 0;
 
-        List<Neuron> neurons = word.neurons;
-        double[] neu1e = new double[layerSize];//误差项
-        double[] neu1 = new double[layerSize];//误差项
-        WordNeuron last_word;
+            List<Neuron> neurons = word.neurons;
+            double[] neu1e = new double[layerSize];//误差项
+            double[] neu1 = new double[layerSize];//误差项
+            WordNeuron last_word;
 
-        for (a = b; a < window * 2 + 1 - b; a++)
-            if (a != window) {
-                c = index - window + a;
-                if (c < 0)
-                    continue;
-                if (c >= sentence.size())
-                    continue;
-                last_word = sentence.get(c);
-                if (last_word == null)
-                    continue;
+            for (a = b; a < window * 2 + 1 - b; a++)
+                if (a != window) {
+                    c = index - window + a;
+                    if (c < 0)
+                        continue;
+                    if (c >= sentence.size())
+                        continue;
+                    last_word = sentence.get(c);
+                    if (last_word == null)
+                        continue;
+                    for (c = 0; c < layerSize; c++)
+                        neu1[c] += last_word.syn0[c];
+                }
+
+            //HIERARCHICAL SOFTMAX
+            for (int d = 0; d < neurons.size(); d++) {
+                HiddenNeuron out = (HiddenNeuron) neurons.get(d);
+                double f = 0;
+                // Propagate hidden -> output
                 for (c = 0; c < layerSize; c++)
-                    neu1[c] += last_word.syn0[c];
+                    f += neu1[c] * out.syn1[c];
+                if (f <= -MAX_EXP)
+                    continue;
+                else if (f >= MAX_EXP)
+                    continue;
+                else
+                    f = expTable[(int) ((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
+                // 'g' is the gradient multiplied by the learning rate
+                //            double g = (1 - word.codeArr[d] - f) * alpha;
+                //              double g = f*(1-f)*( word.codeArr[i] - f) * alpha;
+                double g = f * (1 - f) * (word.codeArr[d] - f) * alpha;
+                //
+                for (c = 0; c < layerSize; c++) {
+                    neu1e[c] += g * out.syn1[c];
+                }
+                // Learn weights hidden -> output
+                for (c = 0; c < layerSize; c++) {
+                    out.syn1[c] += g * neu1[c];
+                }
             }
+            for (a = b; a < window * 2 + 1 - b; a++) {
+                if (a != window) {
+                    c = index - window + a;
+                    if (c < 0)
+                        continue;
+                    if (c >= sentence.size())
+                        continue;
+                    last_word = sentence.get(c);
+                    if (last_word == null)
+                        continue;
+                    for (c = 0; c < layerSize; c++)
+                        last_word.syn0[c] += neu1e[c];
+                }
 
-        //HIERARCHICAL SOFTMAX
-        for (int d = 0; d < neurons.size(); d++) {
-            HiddenNeuron out = (HiddenNeuron) neurons.get(d);
-            double f = 0;
-            // Propagate hidden -> output
-            for (c = 0; c < layerSize; c++)
-                f += neu1[c] * out.syn1[c];
-            if (f <= -MAX_EXP)
-                continue;
-            else if (f >= MAX_EXP)
-                continue;
-            else
-                f = expTable[(int) ((f + MAX_EXP) * (EXP_TABLE_SIZE / MAX_EXP / 2))];
-            // 'g' is the gradient multiplied by the learning rate
-            //            double g = (1 - word.codeArr[d] - f) * alpha;
-            //              double g = f*(1-f)*( word.codeArr[i] - f) * alpha;
-            double g = f * (1 - f) * (word.codeArr[d] - f) * alpha;
-            //
-            for (c = 0; c < layerSize; c++) {
-                neu1e[c] += g * out.syn1[c];
             }
-            // Learn weights hidden -> output
-            for (c = 0; c < layerSize; c++) {
-                out.syn1[c] += g * neu1[c];
-            }
-        }
-        for (a = b; a < window * 2 + 1 - b; a++) {
-            if (a != window) {
-                c = index - window + a;
-                if (c < 0)
-                    continue;
-                if (c >= sentence.size())
-                    continue;
-                last_word = sentence.get(c);
-                if (last_word == null)
-                    continue;
-                for (c = 0; c < layerSize; c++)
-                    last_word.syn0[c] += neu1e[c];
-            }
-
+        }catch(Exception e){
+            logger.error("cbowGram() error! ",e );
         }
     }
 
@@ -274,11 +292,11 @@ public class Learn {
                 }
             }
         }catch(FileNotFoundException fnne){
-            fnne.printStackTrace();
+            logger.error("readVocab() FileNotFoundException! ",fnne);
         }catch (IOException ioe){
-            ioe.printStackTrace();
+            logger.error("readVocab() IOException! ",ioe);
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("readVocab() Exception! ",e);
         }
 
         for (Entry<String, Integer> element : mc.get().entrySet()) {
@@ -292,9 +310,13 @@ public class Learn {
      * f(x) = x / (x + 1)
      */
     private void createExpTable() {
-        for (int i = 0; i < EXP_TABLE_SIZE; i++) {
-            expTable[i] = Math.exp(((i / (double) EXP_TABLE_SIZE * 2 - 1) * MAX_EXP));
-            expTable[i] = expTable[i] / (expTable[i] + 1);
+        try {
+            for (int i = 0; i < EXP_TABLE_SIZE; i++) {
+                expTable[i] = Math.exp(((i / (double) EXP_TABLE_SIZE * 2 - 1) * MAX_EXP));
+                expTable[i] = expTable[i] / (expTable[i] + 1);
+            }
+        }catch (Exception e){
+            logger.error("createExpTable() error! ",e);
         }
     }
 
@@ -304,15 +326,19 @@ public class Learn {
      * @throws IOException 
      */
     public void learnFile(File file) throws IOException {
-        readVocab(file);
-        new Haffman(layerSize).make(wordMap.values());
-        
-        //查找每个神经元
-        for (Neuron neuron : wordMap.values()) {
-            ((WordNeuron)neuron).makeNeurons() ;
+        try {
+            readVocab(file);
+            new Haffman(layerSize).make(wordMap.values());
+
+            //查找每个神经元
+            for (Neuron neuron : wordMap.values()) {
+                ((WordNeuron) neuron).makeNeurons();
+            }
+
+            trainModel(file);
+        }catch (Exception e){
+            logger.error("learnFile() error ! ",e);
         }
-        
-        trainModel(file);
     }
 
     /**
@@ -341,12 +367,11 @@ public class Learn {
             }
             dataOutputStream.close();
         }catch(FileNotFoundException fnne){
-            fnne.printStackTrace();
-        }catch (IOException ioe) {
-            // TODO Auto-generated catch block
-            ioe.printStackTrace();
-        }catch (Exception e){
-            e.printStackTrace();
+            logger.error("saveModel() FileNotFoundException! ",fnne);
+        }catch (IOException ioe){
+            logger.error("saveModel() IOException! ",ioe);
+        }catch(Exception e){
+            logger.error("saveModel() Exception! ",e);
         }
     }
 

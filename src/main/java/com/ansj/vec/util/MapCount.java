@@ -5,33 +5,53 @@
 
 package com.ansj.vec.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 public class MapCount<T> {
+    private static Logger logger = LoggerFactory.getLogger(MapCount.class);
     private HashMap<T, Integer> hm = null;
 
     public MapCount() {
-        this.hm = new HashMap();
+        try {
+            this.hm = new HashMap();
+        }catch (Exception e){
+            logger.error("MapCount() error ",e);
+        }
     }
 
     public MapCount(int initialCapacity) {
-        this.hm = new HashMap(initialCapacity);
+        try {
+            this.hm = new HashMap(initialCapacity);
+        }catch (Exception e){
+            logger.error("MapCount() error ",e);
+        }
     }
 
     public void add(T t, int n) {
-        Integer integer = null;
-        if((integer = (Integer)this.hm.get(t)) != null) {
-            this.hm.put(t, Integer.valueOf(integer.intValue() + n));
-        } else {
-            this.hm.put(t, Integer.valueOf(n));
+        try {
+            Integer integer = null;
+            if ((integer = (Integer) this.hm.get(t)) != null) {
+                this.hm.put(t, Integer.valueOf(integer.intValue() + n));
+            } else {
+                this.hm.put(t, Integer.valueOf(n));
+            }
+        }catch (Exception e){
+            logger.error("add() error ",e);
         }
 
     }
 
     public void add(T t) {
-        this.add(t, 1);
+        try {
+            this.add(t, 1);
+        }catch (Exception e){
+            logger.error("add() error ",e);
+        }
     }
 
     public int size() {
@@ -47,19 +67,24 @@ public class MapCount<T> {
     }
 
     public String getDic() {
-        Iterator iterator = this.hm.entrySet().iterator();
-        StringBuilder sb = new StringBuilder();
-        Entry next = null;
+        try {
+            Iterator iterator = this.hm.entrySet().iterator();
+            StringBuilder sb = new StringBuilder();
+            Entry next = null;
 
-        while(iterator.hasNext()) {
-            next = (Entry)iterator.next();
-            sb.append(next.getKey());
-            sb.append("\t");
-            sb.append(next.getValue());
-            sb.append("\n");
+            while (iterator.hasNext()) {
+                next = (Entry) iterator.next();
+                sb.append(next.getKey());
+                sb.append("\t");
+                sb.append(next.getValue());
+                sb.append("\n");
+            }
+
+            return sb.toString();
+        }catch (Exception e){
+            logger.error("getDic() error ",e);
+            return "getDic() error!";
         }
-
-        return sb.toString();
     }
 
     public static void main(String[] args) {

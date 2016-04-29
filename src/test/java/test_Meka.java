@@ -5,6 +5,9 @@
 import com.sohu.text.ConstructVectorSpace.ConstructVecSpace;
 import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords;
 
+import meka.classifiers.multilabel.Evaluation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import weka.core.*;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.classifiers.multilabel.PS;
@@ -16,12 +19,12 @@ import java.util.ArrayList;
 
 
 public class test_Meka {
-
+    private static Logger logger = LoggerFactory.getLogger(test_Meka.class);
     public static void main(String[] args){
-
-
+        String sysout = "";
         //prepare data
        //genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test.arff","test");
+
         genTrainTestARFF("train_samples","test.arff","test");
 
         try {
@@ -34,20 +37,28 @@ public class test_Meka {
             Instances dataTest = new Instances(new BufferedReader(new FileReader("test.arff")));
             dataTest.setClassIndex(dataTest.numAttributes() -1);
 
+            logger.info("test_Meka 加载数据成功");
             // "java meka.classifiers.multilabel.PS -P 1 -N 1 -t data.arff -W weka.classifiers.functions.SMO"
 
             MultiLabelClassifier ps = new PS();
             //String[] options = {"-P","1", "-N", "1", "-t", "test.arff", "-W","weka.classifiers.functions.SMO"};
             String[] options = {"-P","0", "-N", "5","-W","weka.classifiers.functions.SMO"};
             ps.setOptions(options);
+
+            logger.info("test_Meka 开始训练分类器");
             ps.buildClassifier(dataTrain);
+
+            logger.info("test_Meka 保存分类器");
             saveClassifier(ps,"classifier");
+
 
             float right = 0.0f;
             for(int  i = 0;i<dataTest.numInstances();i++)//测试分类结果
             {
                 double testLabel = ps.classifyInstance(dataTest.instance(i));
                 double truthLabel = dataTest.instance(i).classValue();
+
+                logger.info("test: " + testLabel + "  truth: "+ truthLabel);
                 System.out.printf("test: %f  truth: %f \n",testLabel,truthLabel);
 
                 if(testLabel == truthLabel)//如果预测值和答案值相等（测试语料中的分类列提供的须为正确答案，结果才有意义）
@@ -55,9 +66,14 @@ public class test_Meka {
                     right++;//正确值加1
                 }
             }
+
+            logger.info("the sum is "+ dataTest.numInstances());
+            logger.info("right is "+ right);
+            logger.info("the rate is "+ right/dataset.numInstances());
+
             System.out.printf("the sum is %d,  right is %f, the rate is %f \n",dataTest.numInstances(),right,right/dataset.numInstances());
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("test_Meka error! ",e);
         }
 
 
