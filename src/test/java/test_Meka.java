@@ -5,13 +5,17 @@
 import com.sohu.text.ConstructVectorSpace.ConstructVecSpace;
 import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords;
 
-import meka.classifiers.multilabel.Evaluation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.LogLevel;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+
 import weka.core.*;
+import weka.classifiers.Classifier;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.classifiers.multilabel.PS;
-import weka.classifiers.Classifier;
+
 
 import java.io.*;
 import java.text.ParseException;
@@ -20,12 +24,18 @@ import java.util.ArrayList;
 
 public class test_Meka {
     private static Logger logger = LoggerFactory.getLogger(test_Meka.class);
+
+
     public static void main(String[] args){
-        String sysout = "";
+
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J(LogLevel.INFO, LogLevel.ERROR);
+        System.out.println("我在测试out");
+        System.err.println("我在测试err");
         //prepare data
        //genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test.arff","test");
 
-        genTrainTestARFF("train_samples","test.arff","test");
+        //genTrainTestARFF("train_samples","test.arff","test");
+       // genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test11.arff","test");
 
         try {
             Instances dataset = new Instances(new BufferedReader(new FileReader("test.arff")));

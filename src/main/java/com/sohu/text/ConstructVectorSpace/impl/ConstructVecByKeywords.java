@@ -37,6 +37,7 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
         loadW2VModel(w2vModel);
     }
     public  ConstructVecByKeywords(int nKeywordsNum, String w2vModelPath, boolean isMulScore){
+        System.out.println("ConstructVecByKeywords 测试out");
         try {
             keywordsNum = nKeywordsNum;
             isMultiplyScore = isMulScore;
