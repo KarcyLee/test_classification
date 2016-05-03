@@ -145,7 +145,7 @@
                 </os>
             </activation>
             <properties>
-                <api.log.path>D:/OwnGit/test_classification/log/test_classification.log</api.log.path>
+                <api.log.path>./log/test_classification.log</api.log.path>
             </properties>
         </profile>
         <profile>

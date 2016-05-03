@@ -6,14 +6,14 @@ package com.sohu.text.Classification;
 public interface Classify {
 
     /////************TRAIN*********************////
-    public void trainSingleClassifierWithLabel(float[][] features,float[] labels);
-    public void trainSingleClassifierWithoutLabel(float[][] features);
+    public void trainSingleClassifierWithLabel(double[][] features,double[] labels,String model);
+    public void trainSingleClassifierWithoutLabel(double[][] features,String model);
 
-    public void trainMultiClassifierWithLabel(float[][] features,float[] labels);
-    public void trainMultiClassifierWithoutLabel(float[][] features);
+    public void trainMultiClassifierWithLabel(double[][] features,double[] labels,String model);
+    public void trainMultiClassifierWithoutLabel(double[][] features,String model);
 
 
     /////**************TEST**********************////
-    public int getCategoryID(float [] features);
-    public String getCategoryName(float [] features);
+    public int getCategoryID(double [] features);
+    public String getCategoryName(double [] features);
 }

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class ConstructVecByKeywords implements ConstructVecSpace {
     private static Logger logger = LoggerFactory.getLogger(ConstructVecByKeywords.class);
 
-    /********成员变量部分************************/
+    /////********成员变量部分************************/
     private int keywordsNum ; //每个文档提取关键词的数目
     private boolean isMultiplyScore ; //词向量是否考虑Score作为权重
     private String w2vModel; //"vector.mod" 模型存储全路径
@@ -37,7 +37,7 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
         loadW2VModel(w2vModel);
     }
     public  ConstructVecByKeywords(int nKeywordsNum, String w2vModelPath, boolean isMulScore){
-        System.out.println("ConstructVecByKeywords 测试out");
+        //System.out.println("ConstructVecByKeywords 测试out");
         try {
             keywordsNum = nKeywordsNum;
             isMultiplyScore = isMulScore;

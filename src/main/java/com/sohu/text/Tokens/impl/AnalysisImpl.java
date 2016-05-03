@@ -3,16 +3,10 @@ package com.sohu.text.Tokens.impl;
 
 import java.util.List;
 import java.lang.*;
-import java.util.*;
-import java.io.*;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.ansj.app.keyword.KeyWordComputer;
 import org.ansj.app.keyword.Keyword;
 import org.ansj.util.FilterModifWord;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.input.*;
 import org.ansj.splitWord.analysis.ToAnalysis;
 
 import com.sohu.text.Tokens.Analysis;
@@ -37,6 +31,9 @@ public class AnalysisImpl implements Analysis {
             FilterModifWord.insertStopNatures("uj") ;
             FilterModifWord.insertStopNatures("ul") ;
             FilterModifWord.insertStopNatures("m") ;
+            FilterModifWord.insertStopNatures("en") ;
+            FilterModifWord.insertStopNatures("null") ;
+            FilterModifWord.insertStopNatures("p") ;
             FilterModifWord.insertStopWord("");
             //分词
             List TokensList = ToAnalysis.parse(Content);
@@ -52,11 +49,14 @@ public class AnalysisImpl implements Analysis {
     public List<String> str2words(String str){
         try {
             //分词器过滤词性
-            FilterModifWord.insertStopNatures("v");
-            FilterModifWord.insertStopNatures("w");
-            FilterModifWord.insertStopNatures("uj");
-            FilterModifWord.insertStopNatures("ul");
-            FilterModifWord.insertStopNatures("m");
+            FilterModifWord.insertStopNatures("v") ;
+            FilterModifWord.insertStopNatures("w") ;
+            FilterModifWord.insertStopNatures("uj") ;
+            FilterModifWord.insertStopNatures("ul") ;
+            FilterModifWord.insertStopNatures("m") ;
+            FilterModifWord.insertStopNatures("en") ;
+            FilterModifWord.insertStopNatures("null") ;
+            FilterModifWord.insertStopNatures("p") ;
             FilterModifWord.insertStopWord("");
             //分词
             List TokensList = ToAnalysis.parse(str);
