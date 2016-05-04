@@ -230,7 +230,7 @@ public class test_Meka {
                 if(ls.length != 2){
                     System.out.printf("error! parse failed !\n %s \n",str);
                 }else{
-                    float [] cur_features = vecSpace.genVecFromDoc(ls[0]);
+                    double [] cur_features = vecSpace.genVecFromDoc(ls[0]);
                     if(cur_features == null){
                         System.out.printf("error! 空特征，%s\n",ls[0]);
                         continue;

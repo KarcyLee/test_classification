@@ -13,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import weka.classifiers.Classifier;
 import weka.core.*;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -28,10 +25,10 @@ public class ClassifyByMEKA implements Classify {
     private static Logger logger = LoggerFactory.getLogger(ClassifyByMEKA.class);
     private Classifier m_cls = null; //分类器
     private Attribute m_classAttribute; //分类器训练集的类别集合
+
     ///////******************方法部分******************************
     public void setClassifier(Classifier cls){
         m_cls = cls;
-
     }
     //默认最后一列为label
     public static Instances doubleToInstances(double[][] features,double[] labels){
@@ -184,6 +181,15 @@ public class ClassifyByMEKA implements Classify {
 
         }catch(Exception e){
             logger.error("训练分类器失败！",e);
+            return;
+        }
+        try{
+            logger.info("保存类集合");
+            SerializationHelper.write("Attribute",m_classAttribute);
+            logger.info("保存类集合完毕！");
+        }catch(Exception e){
+            logger.error("保存分类器失败！");
+            return;
         }
         try{
             logger.info("保存分类器");
@@ -191,23 +197,54 @@ public class ClassifyByMEKA implements Classify {
             logger.info("保存分类器完毕！");
         }catch(Exception e){
             logger.error("保存分类器失败！");
+            return;
+        }
+
+    }
+    public Attribute loadAttribute(){
+        Attribute res = null;
+        try{
+            res = (Attribute) weka.core.SerializationHelper.read("Attribute");
+            return res;
+        } catch(Exception e){
+            logger.error("读取Attribute 失败！",e);
+            return res;
         }
     }
-    public Classifier loadClassifier(String modelPath) throws  Exception{
-        return (Classifier) weka.core.SerializationHelper.read(modelPath);
+    public Classifier loadClassifier(String modelPath){
+        try {
+            m_classAttribute = loadAttribute();
+            return (Classifier) weka.core.SerializationHelper.read(modelPath);
+        }catch (Exception e){
+            logger.error("加载分类器失败！",e);
+            return null;
+        }
     }
 
     public static  void main(String[] args){
+
+        //仅供例子
+        double features[][] = null;
+        double labels[] = null;
+
         MultiLabelClassifier ps = new PS();
         //String[] options = {"-P","1", "-N", "1", "-t", "test.arff", "-W","weka.classifiers.functions.SMO"};
-        String[] options = {"-P","0", "-N", "5","-W","weka.classifiers.functions.SMO"};
+        String[] options = {"-P","0", "-N", "1","-W","weka.classifiers.functions.SMO"};
         try {
             ps.setOptions(options);
         }catch (Exception e){
             logger.error("设置分类器错误！",e);
         }
 
-        Classify csy = new ClassifyByMEKA();
+        ClassifyByMEKA csy = new ClassifyByMEKA();
+        csy.setClassifier(ps);
+        csy.trainMultiClassifierWithLabel(features,labels,"model");
+
+        //加载分类器和Attribute
+        csy.loadClassifier("model");
+
+        //预测分类
+        int id = csy.getCategoryID(features[0]);
 
     }
 

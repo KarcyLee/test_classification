@@ -93,9 +93,9 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
 
 
     /////***********************接口部分***********************************/////
-    public float[] genVecFromDoc(String docPath) {
+    public double[] genVecFromDoc(String docPath) {
         try {
-            float[] result = null;
+            double[] result = null;
             //读取文档内容。
             ReadDoc rd = new ReadDocImpl();
             String content = rd.Doc2String(docPath);
@@ -107,9 +107,9 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
             return null;
         }
     }
-    public float[] genVecFromString(String content){
+    public double[] genVecFromString(String content){
         try {
-            float[] result = null;
+            double[] result = null;
             if (content.length() == 0)
                 return result;
             //分词并提取关键词
@@ -127,13 +127,13 @@ public class ConstructVecByKeywords implements ConstructVecSpace {
             ///获取向量长度
             int vecLength = w2v.getSize();
             ///为返回结果数组赋空间
-            result = new float[vecLength * keywordsNum];//关键词个数小于keywordsNum的的，以0补足
+            result = new double[vecLength * keywordsNum];//关键词个数小于keywordsNum的的，以0补足
             //为结果数组赋值,即为各个词向量的级联。
             for (int i = 0; i < keywords.size(); ++i) {
                 Keyword tKW = keywords.get(i);
                 //获取对应关键词的向量
-                float[] vec = w2v.getWordVector(tKW.getName());
-                float score = (float) tKW.getScore();
+                float [] vec = w2v.getWordVector(tKW.getName());
+                double score = (double) tKW.getScore();
                 //若模型中没有该词，返回向量长度为0；
                 if (vec == null) {
                     logger.info(" 模型中没有 " + tKW.getName() + " ");

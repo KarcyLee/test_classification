@@ -47,9 +47,9 @@ public class ConstructVecBySelectedPhrases implements ConstructVecSpace {
 
 
     /////*************************接口部分*********************************
-    public float[] genVecFromDoc(String docPath){
+    public double[] genVecFromDoc(String docPath){
         try {
-            float[] result = null;
+            double[] result = null;
             //读取文档内容。
             ReadDoc rd = new ReadDocImpl();
             String content = rd.Doc2String(docPath);
@@ -60,9 +60,9 @@ public class ConstructVecBySelectedPhrases implements ConstructVecSpace {
             return null;
         }
     }
-    public float[] genVecFromString(String content){
+    public double[] genVecFromString(String content){
         try {
-            float[] result = null;
+            double[] result = null;
             if (content.length() == 0)
                 return result;
             if (m_words.isEmpty()) {
@@ -83,12 +83,12 @@ public class ConstructVecBySelectedPhrases implements ConstructVecSpace {
             int wordsNum = m_words.size();
 
             ///为返回结果数组赋空间
-            result = new float[wordsNum];
+            result = new double[wordsNum];
             int i = 0;
             for (String t_word : m_words) {
                 if (hashMap.containsKey(t_word)) {
                     double tmp = hashMap.get(t_word);
-                    result[i] = (float) tmp;
+                    result[i] = (double) tmp;
                 }
                 i++;
             }
