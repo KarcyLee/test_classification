@@ -29,8 +29,10 @@ public class test_Meka {
     public static void main(String[] args){
 
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J(LogLevel.INFO, LogLevel.ERROR);
-        System.out.println("我在测试out");
-        System.err.println("我在测试err");
+
+        genARFF_example();
+
+        /*
         //prepare data
        //genTrainTestARFF("D:\\Data\\Corpus\\test_samples","test.arff","test");
 
@@ -88,7 +90,7 @@ public class test_Meka {
             logger.error("test_Meka error! ",e);
         }
 
-
+*/
 
 
     }

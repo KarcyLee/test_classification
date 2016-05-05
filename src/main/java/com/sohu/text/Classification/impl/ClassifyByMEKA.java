@@ -15,6 +15,8 @@ import weka.core.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by pengli211286 on 2016/4/22.
@@ -24,7 +26,6 @@ public class ClassifyByMEKA implements Classify {
     /////**********成员变量部分***************************
     private static Logger logger = LoggerFactory.getLogger(ClassifyByMEKA.class);
     private Classifier m_cls = null; //分类器
-    private Attribute m_classAttribute; //分类器训练集的类别集合
 
     ///////******************方法部分******************************
     public void setClassifier(Classifier cls){
@@ -62,7 +63,16 @@ public class ClassifyByMEKA implements Classify {
             for (int i = 0; i < colNum; ++i) {
                 atts.add(new Attribute("feature_" + (i + 1)));
             }
-            atts.add(new Attribute("label"));
+
+            ArrayList<String> label_list = new  ArrayList<String>() ;
+            Set<String> set = new HashSet<String>();
+            for(int i = 0; i < labels.length;++i){
+                set.add(Double.toString(labels[i]));
+            }
+            for(String s :set){
+                label_list.add(s);
+            }
+            atts.add(new Attribute("label",label_list));
             // 生成Instance数据
             Instances data = new Instances("dataSet", atts, 0);
             for (int i = 0; i < rowNum; ++i) {
@@ -70,7 +80,7 @@ public class ClassifyByMEKA implements Classify {
                 for (int j = 0; j < colNum; ++j) {
                     vals[j] = features[i][j];
                 }
-                vals[colNum] = labels[i];
+                vals[colNum] = label_list.indexOf(Double.toString(labels[i]));
                 data.add(new DenseInstance(1.0, vals));
             }
             data.setClassIndex(data.numAttributes() -1);
@@ -109,7 +119,6 @@ public class ClassifyByMEKA implements Classify {
             for (int i = 0; i < colNum; ++i) {
                 atts.add(new Attribute("feature_" + (i + 1)));
             }
-            atts.add(new Attribute("label"));
 
             // 生成Instance数据
             Instances data = new Instances("dataSet", atts, 0);
@@ -135,7 +144,6 @@ public class ClassifyByMEKA implements Classify {
                 logger.error("未生成Instances!");
                 return false;
             }
-
             //保存arrf
             PrintWriter writer = new PrintWriter(arff_file, "UTF-8");
             writer.println(data);
@@ -175,20 +183,11 @@ public class ClassifyByMEKA implements Classify {
         try {
             logger.info("开始训练分类器");
             m_cls.buildClassifier(data);
-            m_classAttribute = data.classAttribute();//保存类别集合
             //m_hasLoadModel = true;
             logger.info("训练分类器完毕！");
 
         }catch(Exception e){
             logger.error("训练分类器失败！",e);
-            return;
-        }
-        try{
-            logger.info("保存类集合");
-            SerializationHelper.write("Attribute",m_classAttribute);
-            logger.info("保存类集合完毕！");
-        }catch(Exception e){
-            logger.error("保存分类器失败！");
             return;
         }
         try{
@@ -213,7 +212,6 @@ public class ClassifyByMEKA implements Classify {
     }
     public Classifier loadClassifier(String modelPath){
         try {
-            m_classAttribute = loadAttribute();
             return (Classifier) weka.core.SerializationHelper.read(modelPath);
         }catch (Exception e){
             logger.error("加载分类器失败！",e);
@@ -287,6 +285,7 @@ public class ClassifyByMEKA implements Classify {
 
     /////**************TEST**********************////
     public int getCategoryID(double [] features){
+        /*
         if (features == null){
             logger.error("输入为空！");
             return -1;
@@ -312,8 +311,11 @@ public class ClassifyByMEKA implements Classify {
             logger.error("测验类别错误！",e);
             return -1;
         }
+        */
+        return -1;
     }
     public String getCategoryName(double [] features){
+        /*
         if (features == null){
             logger.error("输入为空！");
             return "";
@@ -338,5 +340,7 @@ public class ClassifyByMEKA implements Classify {
             logger.error("测验类别错误！",e);
             return "";
         }
+        */
+        return "";
     }
 }
