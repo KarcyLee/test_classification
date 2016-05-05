@@ -1,18 +1,24 @@
 import com.sohu.text.Classification.impl.ClassifyByMEKA;
 import com.sohu.text.ConstructVectorSpace.ConstructVecSpace;
 import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords;
+
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.classifiers.multilabel.PS;
+import meka.core.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.org.lidalia.sysoutslf4j.context.LogLevel;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.evaluation.Evaluation;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 
 import java.io.*;
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 
 /**
@@ -26,108 +32,67 @@ public class test_classify {
 
         Instances dataset = null;
         MultiLabelClassifier ps = null;
-
-        logger.info("开始读取文本，提取关键词特征！");
-        structData train_data = genTrainData("train_samples");
-        logger.info("提取完特征！开始转arff文件");
-        ClassifyByMEKA.doubleToARFF(train_data.features,train_data.labels,"new.arff");
-        logger.info("转arff文件完毕！");
-
-
-        /*
+        Classifier cls = null;
         try {
-            //Instances dataset = new Instances(new BufferedReader(new FileReader("new.arff")));
-            dataset = ClassifyByMEKA.doubleToInstances(train_data.features,train_data.labels);
-            logger.info("test_classify 加载数据成功");
-        }catch (Exception e) {
-            logger.error("加载数组失败！", e);
-            return;
-        }
-
-        ps = new PS();
-        try{
-            String[] options = {"-P","1", "-N", "1","-W","weka.classifiers.functions.SMO"};
-            ps.setOptions(options);
-        }catch(Exception e){
-            logger.error("设置分类器错误！",e);
-        }
-
-        ClassifyByMEKA csy = new ClassifyByMEKA();
-        csy.setClassifier(ps);
-        try {
-            logger.info("开始训练分类器");
-            csy.trainMultiClassifierWithLabel(train_data.features, train_data.labels, "model");
-            logger.info("训练分类器完毕");
-        }catch(Exception e){
-            logger.error("训练分类器失败！",e);
-        }
-
-        //加载分类器和Attribute
-        try {
-            logger.info("加载分类器");
-            csy.loadClassifier("model");
-            logger.info("加载分类器完毕");
-        }catch(Exception e){
-            logger.error("加载分类器错误！",e);
-        }
-
-        try {
-            SerializationHelper.write("classifier", ps);
-            SerializationHelper.write("instances", dataset);
-            logger.info("保存文件完毕！");
-        }catch(Exception e){
-            logger.error("保存文件失败！",e);
-        }
-        */
-        try {
-            ps = (MultiLabelClassifier) SerializationHelper.read("classifier");
             dataset = (Instances) SerializationHelper.read("instances");
         }catch (Exception e){
             logger.error("加载失败！");
         }
+        Instances test = new Instances(dataset);
+        Instances train = dataset;
+        //train.setClassIndex(dataset.numAttributes() -1);
 
+        try{
+            logger.info("开始训练");
+            cls =  new NaiveBayes();
+            cls.buildClassifier(train);
+            logger.info("训练成功");
+        }catch (Exception e){
+            logger.error("训练失败！",e);
+        }
 
+        try{
+            SerializationHelper.write("naiveBayes",cls);
+        }catch (Exception e){
+            logger.error("保存失败",e);
+        }
+
+        /*
         try {
-            //预测分类
-            logger.info("开始预测分类");
+            logger.info("开始交叉验证");
+            Evaluation eval = new Evaluation(train);
+            eval.evaluateModel(cls, test);
+            System.out.println(eval.toSummaryString("\nResults\n======\n",false));
+        }catch (Exception e){
+            logger.error("评估出现错误！",e);
+        }
+        */
+        try {
+            logger.info("开始分类");
+            double right = 0;
             OutputStreamWriter writer = new OutputStreamWriter(
                     new FileOutputStream("result.txt"), "UTF-8");
+            for (int i = 0; i < train.numInstances(); ++i) {
+                double trueIndex = test.instance(i).classValue();
+                String label2 = test.classAttribute().value((int) trueIndex);
 
-            BufferedWriter bufWriter = new BufferedWriter(writer);
-            int colNum = train_data.features[0].length;
-            //double []instFea = new double[colNum + 1];
-            double []instFea = null;
-            double right = 0;
-            for (int i = 0; i < train_data.labels.length; ++i) {
+                double outIndex = cls.classifyInstance(test.instance(i));
+                String label1 = test.classAttribute().value((int) outIndex);
 
-                double truth = train_data.labels[i];
-
-                instFea = new double[colNum + 1];
-
-                for (int k = 0; k < colNum;++k){
-                    instFea[k] = train_data.features[i][k];
-                }
-                Instance inst = new DenseInstance(1.0, instFea);
-                inst.setDataset(dataset);
-
-                double testClassIndex = ps.classifyInstance(inst);
-
-                String category = dataset.classAttribute().value( (int) testClassIndex );
-                double id = Double.parseDouble(category);
-
-
-                bufWriter.write(Double.toString(truth) + " " + category +" " + "\n");
-
-                if (Math.abs(id - truth) < 0.1) {
-                    ++ right;
+                writer.write(outIndex + " " + label1 + " " + trueIndex + " " + label2 + "\n");
+                if (outIndex == trueIndex){
+                    ++right;
                 }
             }
-            bufWriter.close();
-            double rate = right / (double)train_data.labels.length;
-            logger.info("分析完毕！比率为 " +Double.toString(rate));
-        }catch ( Exception e){
-            logger.error("测试错误！",e);
+            writer.close();
+            double rate = right / test.numInstances();
+            logger.info("分类结束");
+            logger.info("rate: "+ rate);
+        }catch (Exception e){
+            logger.error("分类错误！",e);
         }
+
+
 
     }
 
