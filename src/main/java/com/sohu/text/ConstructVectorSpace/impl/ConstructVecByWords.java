@@ -58,6 +58,8 @@ public class ConstructVecByWords extends ConstructVecByKeywords implements Const
         HashMap tm = new HashMap();
         List <Term> parse = NlpAnalysis.parse(content);
         parse = FilterModifWord.updateNature(parse, new Forest[0]);
+        parse = FilterModifWord.modifResult(parse);
+        
         Iterator treeSet = parse.iterator();
 
         while(treeSet.hasNext()) {
@@ -133,6 +135,17 @@ public class ConstructVecByWords extends ConstructVecByKeywords implements Const
         POS_SCORE.put("nz", Double.valueOf(3.0D));
         POS_SCORE.put("v", Double.valueOf(0.2D));
         POS_SCORE.put("kw", Double.valueOf(6.0D));
+    }
+    static{
+        FilterModifWord.insertStopNatures("v") ;
+        FilterModifWord.insertStopNatures("w") ;
+        FilterModifWord.insertStopNatures("uj") ;
+        FilterModifWord.insertStopNatures("ul") ;
+        FilterModifWord.insertStopNatures("m") ;
+        FilterModifWord.insertStopNatures("en") ;
+        FilterModifWord.insertStopNatures("null") ;
+        FilterModifWord.insertStopNatures("p") ;
+        FilterModifWord.insertStopWord("");
     }
     /////***********************接口部分***********************************/////
 
