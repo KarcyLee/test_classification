@@ -2,27 +2,22 @@ import com.sohu.text.Classification.impl.ClassifyByMEKA;
 import com.sohu.text.ConstructVectorSpace.ConstructVecSpace;
 import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords;
 
-import meka.classifiers.multilabel.MultiLabelClassifier;
-import meka.classifiers.multilabel.PS;
-import meka.core.Result;
+import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByKeywords1;
+import com.sohu.text.ConstructVectorSpace.impl.ConstructVecByWords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.org.lidalia.sysoutslf4j.context.LogLevel;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
-import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.evaluation.Evaluation;
-import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 
 import java.io.*;
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 
 /**
  * Created by pengli211286 on 2016/5/4.
+ * 构建特征向量：词向量相加。每个词向量计算权重。
+ * 注意：权重可以选score 或者 freq 。
  */
 public class test_classify {
     private static Logger logger = LoggerFactory.getLogger(test_Meka.class);
@@ -30,69 +25,24 @@ public class test_classify {
     public static void main(String[] args) {
         SysOutOverSLF4J.sendSystemOutAndErrToSLF4J(LogLevel.INFO, LogLevel.ERROR);
 
-        Instances dataset = null;
-        MultiLabelClassifier ps = null;
-        Classifier cls = null;
+
+
+        structData train_data = genTrainData("train_samples");
+        structData test_data = genTrainData("test_samples");
+        structData all_data = genTrainData("all_samples");
+
+        Instances a = ClassifyByMEKA.doubleToInstances(train_data.features,train_data.labels);
+        Instances b = ClassifyByMEKA.doubleToInstances(test_data.features,test_data.labels);
+        Instances c = ClassifyByMEKA.doubleToInstances(all_data.features,all_data.labels);
+
         try {
-            dataset = (Instances) SerializationHelper.read("instances");
+            logger.info("写数据");
+            SerializationHelper.write("train_instances", a);
+            SerializationHelper.write("test_instances", b);
+            SerializationHelper.write("all_instances", c);
         }catch (Exception e){
-            logger.error("加载失败！");
+            logger.error("写入数据失败",e);
         }
-        Instances test = new Instances(dataset);
-        Instances train = dataset;
-        //train.setClassIndex(dataset.numAttributes() -1);
-
-        try{
-            logger.info("开始训练");
-            cls =  new NaiveBayes();
-            cls.buildClassifier(train);
-            logger.info("训练成功");
-        }catch (Exception e){
-            logger.error("训练失败！",e);
-        }
-
-        try{
-            SerializationHelper.write("naiveBayes",cls);
-        }catch (Exception e){
-            logger.error("保存失败",e);
-        }
-
-        /*
-        try {
-            logger.info("开始交叉验证");
-            Evaluation eval = new Evaluation(train);
-            eval.evaluateModel(cls, test);
-            System.out.println(eval.toSummaryString("\nResults\n======\n",false));
-        }catch (Exception e){
-            logger.error("评估出现错误！",e);
-        }
-        */
-        try {
-            logger.info("开始分类");
-            double right = 0;
-            OutputStreamWriter writer = new OutputStreamWriter(
-                    new FileOutputStream("result.txt"), "UTF-8");
-            for (int i = 0; i < train.numInstances(); ++i) {
-                double trueIndex = test.instance(i).classValue();
-                String label2 = test.classAttribute().value((int) trueIndex);
-
-                double outIndex = cls.classifyInstance(test.instance(i));
-                String label1 = test.classAttribute().value((int) outIndex);
-
-                writer.write(outIndex + " " + label1 + " " + trueIndex + " " + label2 + "\n");
-                if (outIndex == trueIndex){
-                    ++right;
-                }
-            }
-            writer.close();
-            double rate = right / test.numInstances();
-            logger.info("分类结束");
-            logger.info("rate: "+ rate);
-        }catch (Exception e){
-            logger.error("分类错误！",e);
-        }
-
-
 
     }
 
@@ -106,7 +56,10 @@ public class test_classify {
         structData result = new structData();
 
         //生成特征向量的接口
-        ConstructVecSpace vecSpace = new ConstructVecByKeywords(10 ,"vector.mod",false);
+        //ConstructVecSpace vecSpace = new ConstructVecByKeywords(10 ,"vector.mod",false);
+        //ConstructVecByKeywords1 vecSpace = new ConstructVecByKeywords1(10 ,"vector.mod",false);
+        ConstructVecByWords vecSpace = new ConstructVecByWords(-1 ,"vector.mod",false);
+        vecSpace.setIsMultiplyScore(true);
 
         try {
             ArrayList<double []> arrayListFeatures = new ArrayList<double[]>();
@@ -134,7 +87,8 @@ public class test_classify {
                         System.out.printf("error! 空特征，%s\n",ls[0]);
                         continue;
                     }
-                    if (cur_features.length != 200 * 10) {
+                    //if (cur_features.length != 200 * 10) {
+                    if (cur_features.length != 200) {
                         System.out.printf("error!维度不对！\n %s, %d\n", ls[0], cur_features.length);
                         continue;
                     }
@@ -162,4 +116,5 @@ public class test_classify {
             return result;
         }
     }
+
 }
