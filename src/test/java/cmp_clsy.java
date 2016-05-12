@@ -42,11 +42,11 @@ public class cmp_clsy {
 //            ls.setOptions(Options);
 //            cls = (Classifier)ls;
 
-            //cls = new BayesNet();
-            cls = new NaiveBayes();
+            cls = new BayesNet();
+            //cls = new NaiveBayes();
 
             //cls = new IBk(5);
-            logger.info("相加-所有词-无权重！");
+            logger.info("相加-所有词-有权重！");
             logger.info(cls.toString());
             logger.info("开始交叉验证！");
             Evaluation eval = new Evaluation(all_data);

@@ -43,6 +43,8 @@ public class Learn {
 
     private int MAX_EXP = 6;
 
+    private int freqThresold = 5;
+
     public Learn(Boolean isCbow, Integer layerSize, Integer window, Double alpha, Double sample) {
         try {
             createExpTable();
@@ -291,6 +293,7 @@ public class Learn {
                     mc.add(string);
                 }
             }
+            br.close();
         }catch(FileNotFoundException fnne){
             logger.error("readVocab() FileNotFoundException! ",fnne);
         }catch (IOException ioe){
@@ -300,8 +303,10 @@ public class Learn {
         }
 
         for (Entry<String, Integer> element : mc.get().entrySet()) {
-            wordMap.put(element.getKey(), new WordNeuron(element.getKey(), element.getValue(),
-                layerSize));
+            if (element.getValue() < freqThresold)
+                continue;
+            wordMap.put(element.getKey(), new WordNeuron(element.getKey(),
+                    element.getValue(), layerSize));
         }
     }
 
@@ -340,7 +345,9 @@ public class Learn {
             logger.error("learnFile() error ! ",e);
         }
     }
-
+    public Map<String, Neuron> getWord2VecModel() {
+        return wordMap;
+    }
     /**
      * 保存模型
      */

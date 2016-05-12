@@ -32,16 +32,22 @@ public class w2v_Test {
     private static final File CorpusFile = new File("result.txt");
     public static void main(String[] args) throws IOException {
         try {
-            File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C3-Art").listFiles();
-            //File root = new File("D:\\Data");
+            //File[] files = new File("D:\\Data\\Corpus\\tc-corpus-answer\\answer\\C3-Art").listFiles();
+            //File[] files = new File("/home/karl/Corpus").listFiles();
+
             //List<File> files = getAllFiles(root);
+            List<File> files = new ArrayList<File>();
+            readAllFileFromParentCatalog("/home/karl/Corpus",files);
+
+
 
             //构建语料
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(CorpusFile);
                 for (File file : files) {
-                    if (file.canRead() && file.getName().endsWith(".txt")) {
+                    //if (file.canRead() && file.getName().endsWith(".txt")) {
+                    if (file.canRead() ) {
                         myParserFile(fos, file);
                     }
                 }
@@ -110,7 +116,8 @@ public class w2v_Test {
         StringBuilder sb = new StringBuilder() ;
         Analysis as = new AnalysisImpl();
         try{
-            br = IOUtil.getReader(file.getAbsolutePath(), IOUtil.GBK);
+            //br = IOUtil.getReader(file.getAbsolutePath(), IOUtil.GBK);
+            br = IOUtil.getReader(file.getAbsolutePath(), IOUtil.UTF8);
             //分词器过滤词性
             FilterModifWord.insertStopNatures("v") ;
             FilterModifWord.insertStopNatures("w") ;
@@ -175,6 +182,23 @@ public class w2v_Test {
             }
         }
         return result;
+    }
+
+    private static void readAllFileFromParentCatalog(String path,List<File> result){
+
+        File[] files = new File(path).listFiles(); // 得到f文件夹下面的所有文件。
+        if(null == result) {
+            result = new ArrayList<File>();
+        }
+        for (File file : files) {
+            if(file.isDirectory()) {
+                //如何当前路劲是文件夹，则循环读取这个文件夹下的所有文件
+                readAllFileFromParentCatalog(file.getAbsolutePath(),result);
+            } else {
+                result.add(file);
+            }
+        }
+
     }
 
 }

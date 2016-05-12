@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static java.lang.Math.abs;
 import static java.lang.Math.min;
 
 /**
@@ -59,7 +60,7 @@ public class ConstructVecByWords extends ConstructVecByKeywords implements Const
         List <Term> parse = NlpAnalysis.parse(content);
         parse = FilterModifWord.updateNature(parse, new Forest[0]);
         parse = FilterModifWord.modifResult(parse);
-        
+
         Iterator treeSet = parse.iterator();
 
         while(treeSet.hasNext()) {
@@ -195,15 +196,15 @@ public class ConstructVecByWords extends ConstructVecByKeywords implements Const
                     } else {
                         result[j] = vec[j];
                     }
-                    arrSum[j] += result[j];
+                    arrSum[j] += Math.abs(result[j]);
                 }
                 ++count;
             }
-            //归一化
+            //L1 归一化
             if(count != 0){
                 for (int j = 0; j < vecLength; ++j){
                     //result[j] = result[j] - (arrSum[j] / count);
-                    result[j] /= count;
+                    result[j]  = result[j] * count / arrSum[j];
                 }
             }else {
                 logger.info("参与文档向量构建的词向量为0");

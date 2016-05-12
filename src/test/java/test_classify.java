@@ -59,7 +59,7 @@ public class test_classify {
         //ConstructVecSpace vecSpace = new ConstructVecByKeywords(10 ,"vector.mod",false);
         //ConstructVecByKeywords1 vecSpace = new ConstructVecByKeywords1(10 ,"vector.mod",false);
         ConstructVecByWords vecSpace = new ConstructVecByWords(-1 ,"vector.mod",false);
-        vecSpace.setIsMultiplyScore(true);
+        //vecSpace.setIsMultiplyScore(true);
 
         try {
             ArrayList<double []> arrayListFeatures = new ArrayList<double[]>();
