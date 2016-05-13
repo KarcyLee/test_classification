@@ -3,6 +3,10 @@ import com.ansj.vec.LearnDocVec;
 import com.ansj.vec.Word2VEC;
 import com.ansj.vec.domain.Neuron;
 import com.ansj.vec.util.ReadWriteFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.org.lidalia.sysoutslf4j.context.LogLevel;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
 import java.io.File;
 import java.util.Map;
@@ -12,8 +16,10 @@ import java.util.Map;
  * Created by pengli211286 on 2016/5/12.
  */
 public class d2v_test {
+    private static Logger logger = LoggerFactory.getLogger(d2v_test.class);
 
     public static void main(String[] args) {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J(LogLevel.INFO, LogLevel.ERROR);
 
         try {
             File result = new File("file//clinicalcases.txt");

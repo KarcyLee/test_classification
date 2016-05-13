@@ -179,8 +179,7 @@ public class LearnDocVec {
 	 * @param sentence
 	 * @param
 	 */
-	private void skipGram(int index, int sent_no, List<WordNeuron> sentence,
-			int b) {
+	private void skipGram(int index, int sent_no, List<WordNeuron> sentence, int b) {
 		// TODO Auto-generated method stub
 		WordNeuron word = sentence.get(index);
 		int a, c = 0;
@@ -427,7 +426,6 @@ public class LearnDocVec {
 	}
 
 	public Map<Integer, float[]> getDocVector() {
-
 		return doc_vector;
 	}
 
